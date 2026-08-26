@@ -95,9 +95,9 @@ All included HTML applications are self-contained, standalone web interfaces tha
 
 Full walkthroughs and live execution demonstrations are published on LinkedIn:
 
-- **Autonomous Sales Machine Demo**: `LinkedIn Demo: TO_BE_ADDED`
-- **Groqtalk AI Demo**: `LinkedIn Demo: TO_BE_ADDED`
-- **SmartPost AI Demo**: `LinkedIn Demo: TO_BE_ADDED`
+- **Autonomous Sales Machine**: 🎬 **[Watch Live Walkthrough](https://lnkd.in/p/dikig8p8)**
+- **Groqtalk AI**: `LinkedIn Demo: TO_BE_ADDED`
+- **SmartPost AI**: `LinkedIn Demo: TO_BE_ADDED`
 
 ---
 

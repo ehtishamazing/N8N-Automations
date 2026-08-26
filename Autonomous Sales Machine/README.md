@@ -157,4 +157,4 @@ flowchart TD
 
 ## Demo
 
-- **LinkedIn Demo**: `TO_BE_ADDED`
+- **LinkedIn Demo**: 🎬 **[Watch Full Video Walkthrough on LinkedIn](https://lnkd.in/p/dikig8p8)**
