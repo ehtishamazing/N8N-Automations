@@ -52,7 +52,7 @@ n8n-automations/
 All included HTML applications are self-contained, standalone web interfaces that can be run directly in any modern browser to demonstrate the frontend layer of each automation:
 
 - **Autonomous Sales Machine**:
-  - [Executive Dashboard](./Autonomous%20Sales%20Machine/Dashboard.html) — Real-time campaign tracking, pipeline status charts, and lead score distribution.
+  - [Executive Dashboard (Local)](./Autonomous%20Sales%20Machine/Dashboard.html) · 🌐 **[Live Hosted Dashboard](https://ehtishamazing.github.io/sales-dashboard/index.html)** — Real-time campaign tracking, pipeline status charts, and lead score distribution.
   - [Client Portal](./Autonomous%20Sales%20Machine/Client%20Portal.html) — Client-accessible portal with credential gating and campaign visibility.
 - **Groqtalk AI**:
   - [GROQTALK PRO](./Groqtalk%20AI/GROQTALK%20PRO.html) — Modern AI chat application with multi-chat persistence in local storage.

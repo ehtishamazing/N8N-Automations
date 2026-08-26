@@ -21,11 +21,11 @@ An end-to-end autonomous B2B sales outreach and follow-up engine built in **n8n*
 
 This automation includes production-ready, standalone web interfaces for monitoring lead status, tracking reply rates, and offering client-facing transparency:
 
-- **Executive Analytics Dashboard**: [Open Dashboard](./Dashboard.html)
+- **Executive Analytics Dashboard**: [Open Local File](./Dashboard.html) · 🌐 **[Live Hosted Dashboard](https://ehtishamazing.github.io/sales-dashboard/index.html)**
   - Real-time pipeline KPI cards (Total Leads, Emails Sent, Automated Follow-Ups, Leads Replied, Average Lead Score).
   - Dynamic Chart.js visualizations for pipeline status distribution, lead score breakdown, and response rates.
   - Live data grid showing individual lead records with status badges.
-- **Multi-Tenant Client Portal**: [Open Client Portal](./Client%20Portal.html)
+- **Multi-Tenant Client Portal**: [Open Local File](./Client%20Portal.html)
   - Client authentication interface with secure Client ID & Access Key gating.
   - Dedicated client view displaying outbound campaign metrics, scheduled touchpoints, and conversion status.
 
