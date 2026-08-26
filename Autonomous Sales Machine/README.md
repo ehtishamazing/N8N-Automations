@@ -15,6 +15,31 @@ An end-to-end autonomous B2B sales outreach and follow-up engine built in **n8n*
 ### Client Portal
 ![Autonomous Sales Machine Client Portal](./Aut%20Sales%20Machine%20Client%20Portal.jpeg)
 
+### Dynamic Personalized Email Delivery
+![Custom Personalized Email](./Custom%20personalised%20email.jpeg)
+
+---
+
+## Niche-Adaptive Email Engine & Dynamic Styling
+
+Beyond generating custom body text, the system uses an intelligent **HTML/CSS dynamic templating engine** that automatically re-themes the email's visual branding and color palette based on the prospect's business industry:
+
+| Industry Keywords Detected | Header Gradient Color Palette | Visual Theme Accent |
+| :--- | :--- | :--- |
+| **Tech, Digital, Software** | `linear-gradient(135deg, #06B6D4, #0E7490)` | Cyan / Ocean Teal |
+| **Beauty, Salon, Parlour** | `linear-gradient(135deg, #8B5CF6, #6D28D9)` | Royal Violet / Purple |
+| **Restaurant, Cafe, Food** | `linear-gradient(135deg, #F59E0B, #D97706)` | Warm Amber / Orange |
+| **Healthcare, Clinic, Medical** | `linear-gradient(135deg, #0EA5E9, #0284C7)` | Sky Blue / Trust Blue |
+| **Bakery, Sweets** | `linear-gradient(135deg, #EC4899, #BE185D)` | Rose Pink / Magenta |
+| **Default / Professional B2B** | `linear-gradient(135deg, #1A1A1A, #2D2D2D)` | Sleek Midnight / Dark Slate |
+
+Each email is generated as a structured HTML asset containing:
+- **Industry-specific color gradient header** with company name pre-filled.
+- **AI-crafted 3-paragraph copy** addressing exact niche bottlenecks.
+- **Framed highlight callout box** emphasizing value propositions.
+- **Direct call booking CTA button** linking to the operator's calendar.
+- **Executive signature card** with company title and verification.
+
 ---
 
 ## Interactive Dashboards & Portals

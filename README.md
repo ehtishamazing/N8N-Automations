@@ -26,6 +26,7 @@ n8n-automations/
 │   ├── Autonomous Sales Machine Workflow screenshot.png # High-resolution workflow canvas
 │   ├── Autonomous Sales Machine Dashboard.jpeg        # Live analytics dashboard preview
 │   ├── Aut Sales Machine Client Portal.jpeg           # Client portal interface preview
+│   ├── Custom personalised email.jpeg                 # Dynamic niche-adaptive email sample
 │   ├── Dashboard.html                                 # Interactive KPI & analytics dashboard
 │   └── Client Portal.html                             # Multi-client authenticated dashboard
 │
