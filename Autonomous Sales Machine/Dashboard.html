@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autonomous Sales Machine — Live Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
+  .topbar { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
+  .topbar h1 { font-size: 17px; font-weight: 600; }
+  .topbar p { font-size: 12px; color: #888; margin-top: 2px; }
+  .right-bar { display: flex; align-items: center; gap: 12px; }
+  .live-badge { display: flex; align-items: center; font-size: 12px; color: #1a7a4a; background: #e6f4ee; padding: 4px 10px; border-radius: 99px; gap: 6px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #1D9E75; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .refresh-btn { background: #1a1a1a; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+  .refresh-btn:hover { background: #333; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+  .metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+  .metric { background: #fff; border-radius: 12px; padding: 18px; border: 1px solid #ebebeb; }
+  .metric-label { font-size: 11px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .metric-value { font-size: 28px; font-weight: 600; color: #1a1a1a; }
+  .metric-sub { font-size: 11px; color: #aaa; margin-top: 4px; }
+  .charts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #ebebeb; }
+  .card-title { font-size: 12px; font-weight: 600; color: #555; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .legend { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+  .legend span { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #666; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; font-weight: 600; color: #888; border-bottom: 1px solid #f0f0f0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 11px 14px; border-bottom: 1px solid #f7f7f7; color: #1a1a1a; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafafa; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+  .badge-sent { background: #e6f4ee; color: #1a7a4a; }
+  .badge-pending { background: #fef3e2; color: #b45309; }
+  .badge-yes { background: #e8f0fd; color: #1a56c4; }
+  .badge-no { background: #f3f3f3; color: #888; }
+  .badge-replied { background: #f3e8fd; color: #7c3aed; }
+  .score-bar { display: flex; align-items: center; gap: 8px; }
+  .score-track { flex: 1; height: 6px; background: #f0f0f0; border-radius: 99px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 99px; }
+  .score-num { font-size: 13px; font-weight: 600; min-width: 16px; }
+  .loading { text-align: center; padding: 3rem; color: #aaa; font-size: 14px; }
+  .error-box { padding: 1.5rem; color: #e24b4a; background: #fcebeb; border-radius: 8px; font-size: 13px; margin: 1rem 0; }
+  .groq-badge { background: #fef3e2; color: #854f0b; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 600; margin-left: 6px; }
+  @media(max-width:900px){ .metrics{grid-template-columns:repeat(2,1fr);} .charts{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>Autonomous Sales Machine <span class="groq-badge">Powered by Groq + Llama 3.3</span></h1>
+    <p id="lastUpdated">Connecting to live data...</p>
+  </div>
+  <div class="right-bar">
+    <div class="live-badge"><span class="status-dot"></span>Live</div>
+    <button class="refresh-btn" onclick="loadData()">&#8635; Refresh</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="metrics" id="metrics">
+    <div class="metric"><div class="metric-label">Total Leads</div><div class="metric-value">—</div><div class="metric-sub">in pipeline</div></div>
+    <div class="metric"><div class="metric-label">Emails Sent</div><div class="metric-value">—</div><div class="metric-sub">initial outreach</div></div>
+    <div class="metric"><div class="metric-label">Follow Ups</div><div class="metric-value">—</div><div class="metric-sub">automated</div></div>
+    <div class="metric"><div class="metric-label">Replied</div><div class="metric-value">—</div><div class="metric-sub">leads responded</div></div>
+    <div class="metric"><div class="metric-label">Avg Score</div><div class="metric-value">—</div><div class="metric-sub">out of 10</div></div>
+  </div>
+
+  <div class="charts">
+    <div class="card">
+      <div class="card-title">Pipeline Status</div>
+      <div class="legend">
+        <span><span class="legend-dot" style="background:#1D9E75;"></span>Sent</span>
+        <span><span class="legend-dot" style="background:#378ADD;"></span>Follow up</span>
+        <span><span class="legend-dot" style="background:#7c3aed;"></span>Replied</span>
+        <span><span class="legend-dot" style="background:#EF9F27;"></span>Pending</span>
+      </div>
+      <div style="position:relative;height:180px;">
+        <canvas id="statusChart" role="img" aria-label="Pipeline status chart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Lead Scores</div>
+      <div style="position:relative;height:210px;">
+        <canvas id="scoreChart" role="img" aria-label="Lead scores chart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Reply Rate</div>
+      <div style="position:relative;height:180px;">
+        <canvas id="replyChart" role="img" aria-label="Reply rate chart"></canvas>
+      </div>
+      <div id="replyStats" style="margin-top:12px;font-size:12px;color:#888;text-align:center;"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">All Leads</div>
+    <div id="tableContainer"><div class="loading">Loading leads from Google Sheets...</div></div>
+  </div>
+
+</div>
+
+<script>
+const SHEET_ID = '1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc';
+const SHEET_NAME = 'Leads';
+const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+let statusChart = null, scoreChart = null, replyChart = null;
+
+function getScoreColor(score) {
+  const s = parseFloat(score) || 0;
+  if (s >= 8) return '#1D9E75';
+  if (s >= 6) return '#378ADD';
+  if (s >= 4) return '#EF9F27';
+  return '#E24B4A';
+}
+
+async function loadData() {
+  document.getElementById('lastUpdated').textContent = 'Refreshing...';
+  try {
+    const res = await fetch(URL);
+    const text = await res.text();
+    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+    const rows = json.table.rows || [];
+
+    const leads = rows.map(r => ({
+      name: r.c[0]?.v || '',
+      business: r.c[1]?.v || '',
+      email: r.c[2]?.v || '',
+      status: r.c[3]?.v || '',
+      score: r.c[4]?.v || '',
+      scoreReason: r.c[5]?.v || '',
+      followUpDate: r.c[6]?.v || '',
+      followUpSent: r.c[7]?.v || '',
+      replied: r.c[8]?.v || ''
+    })).filter(l => l.name && l.name !== 'Name');
+
+    const total = leads.length;
+    const sent = leads.filter(l => l.status === 'Sent').length;
+    const followUpSent = leads.filter(l => l.followUpSent === 'Yes').length;
+    const replied = leads.filter(l => l.replied === 'Yes').length;
+    const pending = total - sent;
+    const scores = leads.map(l => parseFloat(l.score)).filter(s => !isNaN(s));
+    const avgScore = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : '—';
+    const replyRate = sent > 0 ? Math.round((replied/sent)*100) : 0;
+
+    document.getElementById('metrics').innerHTML = `
+      <div class="metric"><div class="metric-label">Total Leads</div><div class="metric-value">${total}</div><div class="metric-sub">in pipeline</div></div>
+      <div class="metric"><div class="metric-label">Emails Sent</div><div class="metric-value">${sent}</div><div class="metric-sub">initial outreach</div></div>
+      <div class="metric"><div class="metric-label">Follow Ups</div><div class="metric-value">${followUpSent}</div><div class="metric-sub">automated</div></div>
+      <div class="metric"><div class="metric-label">Replied</div><div class="metric-value">${replied}</div><div class="metric-sub">${replyRate}% reply rate</div></div>
+      <div class="metric"><div class="metric-label">Avg Score</div><div class="metric-value">${avgScore}</div><div class="metric-sub">out of 10</div></div>
+    `;
+
+    if (statusChart) statusChart.destroy();
+    statusChart = new Chart(document.getElementById('statusChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Sent', 'Follow up', 'Replied', 'Pending'],
+        datasets: [{ data: [sent, followUpSent, replied, Math.max(pending,0)], backgroundColor: ['#1D9E75','#378ADD','#7c3aed','#EF9F27'], borderWidth: 2, borderColor: '#fff' }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '65%' }
+    });
+
+    if (scoreChart) scoreChart.destroy();
+    scoreChart = new Chart(document.getElementById('scoreChart'), {
+      type: 'bar',
+      data: {
+        labels: leads.map(l => l.business || l.name),
+        datasets: [{ label: 'Score', data: leads.map(l => parseFloat(l.score)||0), backgroundColor: leads.map(l => getScoreColor(l.score)), borderRadius: 6, borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { min:0, max:10, ticks:{ stepSize:2, color:'#aaa' }, grid:{ color:'#f5f5f5' } }, x:{ grid:{ display:false }, ticks:{ color:'#aaa', maxRotation: 45 } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    if (replyChart) replyChart.destroy();
+    replyChart = new Chart(document.getElementById('replyChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Replied', 'No reply'],
+        datasets: [{ data: [replied, Math.max(sent-replied,0)], backgroundColor: ['#7c3aed','#f3f3f3'], borderWidth: 2, borderColor: '#fff' }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '70%' }
+    });
+    document.getElementById('replyStats').textContent = `${replied} replied out of ${sent} contacted (${replyRate}%)`;
+
+    const tableRows = leads.map(l => {
+      const scoreVal = parseFloat(l.score)||0;
+      const color = getScoreColor(l.score);
+      let statusBadge = l.replied === 'Yes'
+        ? '<span class="badge badge-replied">Replied</span>'
+        : l.status === 'Sent'
+          ? '<span class="badge badge-sent">Sent</span>'
+          : '<span class="badge badge-pending">Pending</span>';
+      return `<tr>
+        <td><strong>${l.name}</strong></td>
+        <td>${l.business}</td>
+        <td style="color:#888;font-size:12px;">${l.email}</td>
+        <td>
+          <div class="score-bar">
+            <div class="score-track"><div class="score-fill" style="width:${scoreVal*10}%;background:${color};"></div></div>
+            <span class="score-num" style="color:${color};">${l.score||'—'}</span>
+          </div>
+        </td>
+        <td>${statusBadge}</td>
+        <td><span class="badge ${l.followUpSent==='Yes'?'badge-yes':'badge-no'}">${l.followUpSent||'No'}</span></td>
+        <td><span class="badge ${l.replied==='Yes'?'badge-replied':'badge-no'}">${l.replied||'No'}</span></td>
+        <td style="font-size:11px;color:#aaa;">${l.followUpDate?l.followUpDate.substring(0,10):'—'}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('tableContainer').innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Name</th><th>Business</th><th>Email</th>
+          <th>Score</th><th>Status</th><th>Follow Up</th>
+          <th>Replied</th><th>Follow Up Date</th>
+        </tr></thead>
+        <tbody>${tableRows||'<tr><td colspan="8" style="text-align:center;color:#aaa;padding:2rem;">No leads found</td></tr>'}</tbody>
+      </table>`;
+
+    document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+  } catch(e) {
+    document.getElementById('lastUpdated').textContent = 'Error loading data';
+    document.getElementById('tableContainer').innerHTML = '<div class="error-box">Could not load data. Make sure your Google Sheet is set to "Anyone with the link can view".</div>';
+  }
+}
+
+loadData();
+setInterval(loadData, 30000);
+</script>
+</body>
+</html>

@@ -1,0 +1,1411 @@
+{
+  "name": "Autonomous Sales Machine",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -64,
+        -80
+      ],
+      "id": "4778d7ac-2946-4d7a-97ae-d3461d104008",
+      "name": "Get Leads",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VW8O3mXXykyj71Xl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "message": "=You are a real human sales consultant writing \na genuine cold email. DO NOT sound like a bot.\n\nYou are writing to:\nName: {{ $('Get Leads').item.json.Name }}\nBusiness: {{ $('Get Leads').item.json.Business }}\n\nWrite a cold email that feels like it was written \nby a real person who genuinely noticed this business.\n\nTONE: Warm, confident, curious — like a smart friend \nwho has something valuable to offer.\n\nPARAGRAPH 1 — GENUINE OPENER (2 sentences):\nBegin with \"Hi {{ $('Get Leads').item.json.Name }},\"\nSay something real and specific about \n{{ $('Get Leads').item.json.Business }} that shows \nyou actually know their world. NO generic compliments.\nExample feel: \"Running a beauty parlour means you're \nconstantly juggling walk-ins, appointments and \nkeeping clients coming back — it's no small feat.\"\n\nPARAGRAPH 2 — THE REAL VALUE (2-3 sentences):\nDo NOT say \"we help businesses like yours.\"\nInstead, paint a picture of what life looks like \nwith your help. Be specific to their industry.\nExample feel: \"We use AI to bring in a steady stream \nof new clients for businesses like yours — \nwithout you lifting a finger. Most of our clients \nfill their calendar within the first two weeks.\"\n\nPARAGRAPH 3 — SOFT CTA (2 sentences):\nNo pressure. No FOMO tactics. Just genuine curiosity.\nExample feel: \"Would it be worth a quick 10-minute \nchat to see if this could work for \n{{ $('Get Leads').item.json.Business }}? \nI think you'd find it interesting.\"\n\nEnd with:\nWarm regards,\nEhtisham\nAI Growth Advisor\n\nRULES:\n- Blank line between every paragraph\n- MAX 8 lines total\n- Natural, flowing sentences — no bullet points\n- NEVER use words: \"spam\", \"leverage\", \n  \"game-changer\", \"revolutionary\", \"synergy\"\n- Sound like a real email from a real person\n- Write ONLY about {{ $('Get Leads').item.json.Business }}\n- No subject line, no placeholders"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        768,
+        -80
+      ],
+      "id": "04cf6733-956a-4e76-99df-fde0023305df",
+      "name": "AI Writer",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get Leads').item.json.Email }}",
+        "subject": "=Quick idea for {{ $('Get Leads').item.json.Business }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<style>\n  body { margin: 0; padding: 0; background: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }\n  .wrapper { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }\n  .body { padding: 40px; }\n  .greeting { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 20px; }\n  .paragraph { font-size: 15px; color: #444444; line-height: 1.7; margin-bottom: 18px; }\n  .highlight-box { border-left: 4px solid #1D9E75; border-radius: 0 8px 8px 0; padding: 20px 24px; margin: 24px 0; }\n  .highlight-box p { font-size: 14px; color: #333; margin: 0; line-height: 1.6; }\n  .cta-btn { display: inline-block; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 32px; border-radius: 8px; margin: 8px 0 24px; }\n  .divider { border: none; border-top: 1px solid #f0f0f0; margin: 28px 0; }\n  .signature { font-size: 14px; color: #666; line-height: 1.6; }\n  .signature strong { color: #1a1a1a; }\n  .footer { background: #f9f9f9; padding: 24px 40px; text-align: center; border-top: 1px solid #f0f0f0; }\n  .footer p { font-size: 12px; color: #aaa; margin: 0; line-height: 1.6; }\n</style>\n</head>\n<body>\n<div class=\"wrapper\">\n\n  <!-- DYNAMIC COLORED HEADER -->\n  <div style=\"background: {{ $('Get Leads').item.json.Business.toLowerCase().includes('salon') || $('Get Leads').item.json.Business.toLowerCase().includes('beauty') || $('Get Leads').item.json.Business.toLowerCase().includes('parlour') ? 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)' : $('Get Leads').item.json.Business.toLowerCase().includes('restaurant') || $('Get Leads').item.json.Business.toLowerCase().includes('cafe') || $('Get Leads').item.json.Business.toLowerCase().includes('food') ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : $('Get Leads').item.json.Business.toLowerCase().includes('clinic') || $('Get Leads').item.json.Business.toLowerCase().includes('hospital') || $('Get Leads').item.json.Business.toLowerCase().includes('medical') ? 'linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%)' : $('Get Leads').item.json.Business.toLowerCase().includes('bakery') || $('Get Leads').item.json.Business.toLowerCase().includes('sweets') ? 'linear-gradient(135deg, #EC4899 0%, #BE185D 100%)' : $('Get Leads').item.json.Business.toLowerCase().includes('tech') || $('Get Leads').item.json.Business.toLowerCase().includes('digital') || $('Get Leads').item.json.Business.toLowerCase().includes('software') ? 'linear-gradient(135deg, #06B6D4 0%, #0E7490 100%)' : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)' }}; padding: 40px 40px 32px;\">\n    <div style=\"color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; opacity: 0.7;\">GROWTH OPPORTUNITY</div>\n    <h1 style=\"color: #ffffff; font-size: 24px; font-weight: 700; margin: 0 0 8px; line-height: 1.3;\">A quick idea for {{ $('Get Leads').item.json.Business }}</h1>\n    <p style=\"color: rgba(255,255,255,0.75); font-size: 14px; margin: 0;\">Personalized outreach · AI Growth Advisor</p>\n  </div>\n\n  <div class=\"body\">\n    <p class=\"greeting\">Hi {{ $('Get Leads').item.json.Name }},</p>\n\n    <p class=\"paragraph\">{{ $json.text.split('\\n\\n')[0] }}</p>\n\n    <div class=\"highlight-box\" style=\"background: {{ $('Get Leads').item.json.Business.toLowerCase().includes('salon') || $('Get Leads').item.json.Business.toLowerCase().includes('beauty') || $('Get Leads').item.json.Business.toLowerCase().includes('parlour') ? '#f5f0ff' : $('Get Leads').item.json.Business.toLowerCase().includes('restaurant') || $('Get Leads').item.json.Business.toLowerCase().includes('cafe') || $('Get Leads').item.json.Business.toLowerCase().includes('food') ? '#fffbeb' : $('Get Leads').item.json.Business.toLowerCase().includes('clinic') || $('Get Leads').item.json.Business.toLowerCase().includes('hospital') || $('Get Leads').item.json.Business.toLowerCase().includes('medical') ? '#f0f9ff' : $('Get Leads').item.json.Business.toLowerCase().includes('bakery') || $('Get Leads').item.json.Business.toLowerCase().includes('sweets') ? '#fdf2f8' : '#f0faf5' }}; border-left-color: {{ $('Get Leads').item.json.Business.toLowerCase().includes('salon') || $('Get Leads').item.json.Business.toLowerCase().includes('beauty') || $('Get Leads').item.json.Business.toLowerCase().includes('parlour') ? '#8B5CF6' : $('Get Leads').item.json.Business.toLowerCase().includes('restaurant') || $('Get Leads').item.json.Business.toLowerCase().includes('cafe') || $('Get Leads').item.json.Business.toLowerCase().includes('food') ? '#F59E0B' : $('Get Leads').item.json.Business.toLowerCase().includes('clinic') || $('Get Leads').item.json.Business.toLowerCase().includes('hospital') || $('Get Leads').item.json.Business.toLowerCase().includes('medical') ? '#0EA5E9' : $('Get Leads').item.json.Business.toLowerCase().includes('bakery') || $('Get Leads').item.json.Business.toLowerCase().includes('sweets') ? '#EC4899' : '#1D9E75' }};\">\n      <p>{{ $json.text.split('\\n\\n')[1] }}</p>\n    </div>\n\n    <p class=\"paragraph\">{{ $json.text.split('\\n\\n')[2] }}</p>\n\n    <a href=\"mailto:ehtishams715@gmail.com?subject=Re: {{ $('Get Leads').item.json.Business }}\" \n       class=\"cta-btn\"\n       style=\"background: {{ $('Get Leads').item.json.Business.toLowerCase().includes('salon') || $('Get Leads').item.json.Business.toLowerCase().includes('beauty') || $('Get Leads').item.json.Business.toLowerCase().includes('parlour') ? '#8B5CF6' : $('Get Leads').item.json.Business.toLowerCase().includes('restaurant') || $('Get Leads').item.json.Business.toLowerCase().includes('cafe') || $('Get Leads').item.json.Business.toLowerCase().includes('food') ? '#F59E0B' : $('Get Leads').item.json.Business.toLowerCase().includes('clinic') || $('Get Leads').item.json.Business.toLowerCase().includes('hospital') || $('Get Leads').item.json.Business.toLowerCase().includes('medical') ? '#0EA5E9' : $('Get Leads').item.json.Business.toLowerCase().includes('bakery') || $('Get Leads').item.json.Business.toLowerCase().includes('sweets') ? '#EC4899' : '#1a1a1a' }};\">\n      Book a Quick Call →\n    </a>\n\n    <hr class=\"divider\">\n\n    <div class=\"signature\">\n      <strong>Ehtisham Ul Haq</strong><br>\n      AI Growth Advisor | Autonomous Sales Systems<br>\n      📧 ehtishams715@gmail.com\n    </div>\n  </div>\n\n  <div class=\"footer\">\n    <p>This email was sent to {{ $('Get Leads').item.json.Email }}<br>\n    Powered by AI · Autonomous Sales Machine</p>\n  </div>\n\n</div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1504,
+        -80
+      ],
+      "id": "389361af-a457-4115-8f6a-8df14d589afd",
+      "name": "Send Email",
+      "webhookId": "0cf34703-5087-4bfd-b57b-6ff011572671",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "n9li6M0i0j8jxioC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get Leads').item.json.row_number }}",
+            "Status": "Sent"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Business",
+              "displayName": "Business",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1728,
+        -80
+      ],
+      "id": "a16c404c-7010-4ae4-a1d3-131c1f6f52c0",
+      "name": " Mark Sent",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VW8O3mXXykyj71Xl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get Leads').item.json.row_number }}",
+            "Score": "={{ JSON.parse($('Scorer ').item.json.text).score }}",
+            "Score Reason": "={{ JSON.parse($('Scorer ').item.json.text).reason }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Business",
+              "displayName": "Business",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Score Reason",
+              "displayName": "Score Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        928,
+        160
+      ],
+      "id": "27740959-9e82-45e5-ac34-9870b70e7185",
+      "name": "Save Score",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VW8O3mXXykyj71Xl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get Leads').item.json.row_number }}",
+            "Follow Up Date": "={{ $now.plus(2, 'days').toISO() }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Business",
+              "displayName": "Business",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Score Reason",
+              "displayName": "Score Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Follow Up Date",
+              "displayName": "Follow Up Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow Up Sent",
+              "displayName": "Follow Up Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2096,
+        128
+      ],
+      "id": "0a80ae20-a1ef-46a7-ad12-c3e5759fd424",
+      "name": "Set Follow Up Date",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VW8O3mXXykyj71Xl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        176,
+        192
+      ],
+      "id": "42decab8-3602-453a-8e3d-9e3c83482289",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "2mCz1uF29BCVE9Da",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        576,
+        208
+      ],
+      "id": "82edf2cb-9944-4ff3-92bd-8d1b1cd62abb",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "2mCz1uF29BCVE9Da",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        544
+      ],
+      "id": "b7f3cc09-7fa9-4890-9418-2271763c551d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Follow Up Sent"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        848
+      ],
+      "id": "09451441-4a4c-4333-a032-1273772ca217",
+      "name": "Get Due Follow Ups",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VW8O3mXXykyj71Xl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get Due Follow Ups').item.json.Email }}",
+        "subject": "=Following up - {{ $('Get Due Follow Ups').item.json.Business }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<style>\n  body { margin: 0; padding: 0; background: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }\n  .wrapper { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }\n  .body { padding: 40px; }\n  .greeting { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 20px; }\n  .paragraph { font-size: 15px; color: #444444; line-height: 1.7; margin-bottom: 18px; }\n  .highlight-box { background: #fffbeb; border-left: 4px solid #F59E0B; border-radius: 0 8px 8px 0; padding: 20px 24px; margin: 24px 0; }\n  .highlight-box p { font-size: 14px; color: #333; margin: 0; line-height: 1.6; }\n  .cta-btn { display: inline-block; background: #1a1a1a; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 32px; border-radius: 8px; margin: 8px 0 24px; }\n  .divider { border: none; border-top: 1px solid #f0f0f0; margin: 28px 0; }\n  .signature { font-size: 14px; color: #666; line-height: 1.6; }\n  .signature strong { color: #1a1a1a; }\n  .footer { background: #f9f9f9; padding: 24px 40px; text-align: center; border-top: 1px solid #f0f0f0; }\n  .footer p { font-size: 12px; color: #aaa; margin: 0; line-height: 1.6; }\n</style>\n</head>\n<body>\n<div class=\"wrapper\">\n\n  <div style=\"background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); padding: 40px 40px 32px;\">\n    <div style=\"color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;\">FOLLOWING UP</div>\n    <h1 style=\"color: #ffffff; font-size: 24px; font-weight: 700; margin: 0 0 8px; line-height: 1.3;\">Still thinking about {{ $('Get Due Follow Ups').item.json.Business }}?</h1>\n    <p style=\"color: rgba(255,255,255,0.75); font-size: 14px; margin: 0;\">Just checking in — no pressure at all</p>\n  </div>\n\n  <div class=\"body\">\n    <p class=\"greeting\">Hi {{ $('Get Due Follow Ups').item.json.Name }},</p>\n\n    <p class=\"paragraph\">I reached out a couple of days ago regarding <strong>{{ $('Get Due Follow Ups').item.json.Business }}</strong> and wanted to follow up — I know your inbox gets busy!</p>\n\n    <div class=\"highlight-box\">\n      <p>I help businesses attract more clients automatically using AI-powered outreach. Most of our clients see results within the first two weeks — without lifting a finger.</p>\n    </div>\n\n    <p class=\"paragraph\">I am not here to waste your time — just a quick 10-minute call to see if there is a fit. If not, no hard feelings at all.</p>\n\n    <p class=\"paragraph\">Would <strong>Tuesday or Wednesday</strong> work for a quick chat?</p>\n\n    <a href=\"mailto:ehtishams715@gmail.com?subject=Re: {{ $('Get Due Follow Ups').item.json.Business }}\" \n       class=\"cta-btn\">\n      Reply to Schedule a Call →\n    </a>\n\n    <hr class=\"divider\">\n\n    <div class=\"signature\">\n      <strong>Ehtisham Ul Haq</strong><br>\n      AI Growth Advisor | Autonomous Sales Systems<br>\n      📧 ehtishams715@gmail.com<br>\n      Available Mon–Fri, 9am–6pm\n    </div>\n  </div>\n\n  <div class=\"footer\">\n    <p>This is a follow-up to our previous email sent to {{ $('Get Due Follow Ups').item.json.Email }}<br>\n    Powered by AI · Autonomous Sales Machine</p>\n  </div>\n\n</div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        864
+      ],
+      "id": "528835e0-0874-4908-8245-a6a8b11b6789",
+      "name": "Send Follow Up",
+      "webhookId": "c4732c6d-f10e-4db1-800b-67bcf96bdbba",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "n9li6M0i0j8jxioC",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $node[\"Get Due Follow Ups\"].json[\"row_number\"] }}",
+            "Follow Up Sent": "Yes"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Business",
+              "displayName": "Business",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Score Reason",
+              "displayName": "Score Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Follow Up Date",
+              "displayName": "Follow Up Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Follow Up Sent",
+              "displayName": "Follow Up Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Replied",
+              "displayName": "Replied",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2112,
+        480
+      ],
+      "id": "ebc9017b-77ff-4d69-a627-5b0397396ede",
+      "name": " Mark Follow Up Sent",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VW8O3mXXykyj71Xl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🚀 MAIN OUTREACH WORKFLOW\nReads leads → Scores with AI → Sends personalized emails",
+        "height": 80,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        416,
+        -688
+      ],
+      "typeVersion": 1,
+      "id": "fe87e3b2-898f-460b-8759-1e93fb3d4d52",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "📧 AUTOMATED FOLLOW UP WORKFLOW  \nRuns every day at 9AM → Sends follow up to non-replies",
+        "height": 80,
+        "width": 448,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        1008
+      ],
+      "typeVersion": 1,
+      "id": "2a4d2e25-66d5-4b73-9831-382c1d3c2903",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "simple": false,
+        "filters": {
+          "q": "={{ $json.Email }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        848
+      ],
+      "id": "f4730645-d573-4f74-a04f-3e6fcac0340e",
+      "name": "Check for Replies",
+      "webhookId": "9071835f-d04d-43d3-968f-28fddfb08bb2",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 5,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "n9li6M0i0j8jxioC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bc3a22d9-ebe3-4552-ac22-9e69d2cd469c",
+              "leftValue": "={{ $json.Replied }}",
+              "rightValue": "Yes",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        864,
+        704
+      ],
+      "id": "279ab018-3ed5-428f-86a2-609c49c9b7a8",
+      "name": "Has Replied",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        -80
+      ],
+      "id": "ecf2ef29-a599-4b01-9cde-eb64a17a327a",
+      "name": "Human Delay",
+      "webhookId": "339edbbd-79f0-484d-a942-f7b020b4b038"
+    },
+    {
+      "parameters": {
+        "sendTo": "beingcalledlemon@gmail.com",
+        "subject": "=🔥 Lead Replied: {{ $('Get Due Follow Ups').item.json.Name }} - {{ $('Get Due Follow Ups').item.json.Business }}",
+        "message": "=<h2>A lead just replied!</h2>\n   <p><b>Name:</b> {{ $('Get Due Follow Ups').item.json.Name }}</p>\n   <p><b>Business:</b> {{ $('Get Due Follow Ups').item.json.Business }}</p>\n   <p><b>Email:</b> {{ $('Get Due Follow Ups').item.json.Email }}</p>\n   <p><b>Lead Score:</b> {{ $('Get Due Follow Ups').item.json.Score }}/10</p>\n   <br>\n   <p>Reply to them NOW while they're warm! 🔥</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        368
+      ],
+      "id": "8470fdf4-eea9-44db-8194-33d407c8922c",
+      "name": "Reply Alert",
+      "webhookId": "9908a446-b962-47d5-a1ae-a15ea8c33dbf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "n9li6M0i0j8jxioC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "29c3197f-d3c7-4e1f-b4c9-b0450b8e222f",
+              "leftValue": "={{ new Date().getHours() }}",
+              "rightValue": 9,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "0e05b035-1ac1-46c3-8fd3-87c3fba80d67",
+              "leftValue": "={{ new Date().getHours() }}",
+              "rightValue": 17,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -48,
+        832
+      ],
+      "id": "42741106-f524-40a9-8a5c-419b7202fcf3",
+      "name": " Business Hours?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1k9xHxtt0ZJSsY-089os5whVKanu4vEhT9B8YRMlZluc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $node[\"Get Due Follow Ups\"].json[\"row_number\"] }}",
+            "Replied": "Yes"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Business",
+              "displayName": "Business",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Score Reason",
+              "displayName": "Score Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Follow Up Date",
+              "displayName": "Follow Up Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Follow Up Sent",
+              "displayName": "Follow Up Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Replied",
+              "displayName": "Replied",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1328,
+        512
+      ],
+      "id": "a15d3652-96c8-4e38-9050-7e6f873fcd75",
+      "name": "Replied",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VW8O3mXXykyj71Xl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "🚀 MAIN OUTREACH WORKFLOW\n\nHOW IT WORKS:\n→ Reads new leads from Google Sheets\n→ AI scores each lead (1-10) using Groq/Llama 3.3\n→ Writes a personalized 3-paragraph cold email\n→ Sends email via Gmail with human-like delay\n→ Updates sheet and schedules follow up in 2 days\n\nTRIGGER: Manual (press Execute Workflow)",
+        "height": 336,
+        "width": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -576
+      ],
+      "id": "f218bdc3-28a3-4b18-8f06-ed8608641f3a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "📧 AUTOMATED FOLLOW UP WORKFLOW\n\nHOW IT WORKS:\n→ Runs automatically every day at 9AM\n→ Checks if current time is business hours (9-5)\n→ Finds all leads with no follow up sent yet\n→ Checks Gmail inbox for replies from each lead\n→ If replied → marks replied + alerts operator\n→ If not replied → sends follow up email\n\nTRIGGER: Automatic (Schedule - Daily 9AM)",
+        "height": 384,
+        "width": 304,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        544,
+        1136
+      ],
+      "id": "e9a7848c-a78f-46e6-9e70-d558e93fa905",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        272
+      ],
+      "id": "7b48d034-5265-43da-a705-3410a0b5816b",
+      "name": " Start"
+    },
+    {
+      "parameters": {
+        "content": "↔️ REPLY DETECTION LOGIC\n\nTRUE path → Lead replied\n  → Mark as Replied in sheet\n  → Send instant alert to operator\n\nFALSE path → No reply found\n  → Send follow up email\n  → Mark Follow Up Sent",
+        "height": 336,
+        "width": 230,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        816,
+        512
+      ],
+      "id": "40d7dc91-8d93-4378-b76f-9e56ca678b2d",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "                           🤖 AI ENGINE\n                     Groq + Llama 3.3 70B\n                          - 99.9% uptime\n                                - Free tier\n                        - Faster than Gemini",
+        "height": 144,
+        "width": 672,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        96,
+        192
+      ],
+      "id": "135dd8dd-87f7-4057-89f9-94bfc2a0270c",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a lead scoring expert. Score ONLY this exact business lead.\n\nRow: {{ $json.row_number }}\nName: {{ $json.Name }}\nBusiness Type: {{ $json.Business }}\nEmail: {{ $json.Email }}\n\nScore from 1-10 based on:\n- How established is {{ $json.Business }}?\n- How valuable is THIS specific business type?\n- Email quality (business domain > gmail)\n\nReply ONLY with this JSON, nothing else:\n{\"score\": \"the score it earned\", \"reason\": \"One sentence about THIS specific business\"}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        288,
+        -80
+      ],
+      "id": "e1f207c7-4da8-42a5-ad49-42551375aaff",
+      "name": "Scorer ",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "content": "Sends lead data to Groq/Llama 3.3 70B. Returns score 1-10 + reason in JSON format. Uses row_number to prevent duplicate name issues.",
+        "height": 256,
+        "width": 304,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        256,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "d1418d1a-3581-4859-a7ba-1920f589b53a",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "Generates personalized 3-paragraph cold email.\nReferences Get Leads node directly to prevent\nbusiness name confusion with duplicate names.",
+        "height": 256,
+        "width": 304,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        736,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "b8bc514c-76cc-4aef-9f63-dfcc0b7a36b7",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "Only proceeds if current hour is between 9AM-5PM.\nEnsures emails are sent during business hours only\nfor higher open rates and professional appearance.",
+        "height": 288,
+        "width": 208,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -96,
+        688
+      ],
+      "typeVersion": 1,
+      "id": "1cf5d2f6-2165-4bb6-a552-710d8998002d",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "Searches Gmail inbox for emails from lead's address\ncontaining \"Re:\" in subject line.\nStandard reply prefix used by all email clients.",
+        "height": 304,
+        "width": 208,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        688
+      ],
+      "typeVersion": 1,
+      "id": "47d17a35-abe8-4b13-ba47-699a7131f0e6",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "\n\nThis system fully automates B2B sales outreach\nusing AI and workflow automation.\n\nMAIN WORKFLOW:\n1. Add leads to Google Sheet (Name, Business, Email)\n2. Click Execute Workflow\n3. AI scores each lead and writes personalized email\n4. Email sent automatically via Gmail\n5. Follow up scheduled for 2 days later\n\nFOLLOW UP WORKFLOW (Automatic):\n1. Runs every day at 9AM automatically\n2. Checks Gmail for replies from each lead\n3. If replied → stops outreach, alerts you\n4. If not replied → sends follow up email\n\nTECH STACK:\n- n8n — Workflow automation\n- Groq + Llama 3.3 70B — AI engine\n- Google Sheets — Lead database/CRM\n- Gmail API — Email delivery\n- GitHub Pages — Live dashboard\n\nBUSINESS MODEL:\n- $200/month Starter (50 leads)\n- $400/month Growth (200 leads)  \n- $800/month Pro",
+        "height": 608,
+        "width": 432,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -928,
+        128
+      ],
+      "typeVersion": 1,
+      "id": "584c4fe1-4211-41f2-888d-686569af67f4",
+      "name": "Sticky Note10"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Leads": {
+      "main": [
+        [
+          {
+            "node": "Scorer ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Writer": {
+      "main": [
+        [
+          {
+            "node": "Human Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": " Mark Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Score": {
+      "main": [
+        [
+          {
+            "node": "AI Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    " Mark Sent": {
+      "main": [
+        [
+          {
+            "node": "Set Follow Up Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Scorer ",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Writer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": " Business Hours?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Due Follow Ups": {
+      "main": [
+        [
+          {
+            "node": "Check for Replies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Follow Up": {
+      "main": [
+        [
+          {
+            "node": " Mark Follow Up Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for Replies": {
+      "main": [
+        [
+          {
+            "node": "Has Replied",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Replied": {
+      "main": [
+        [
+          {
+            "node": "Send Follow Up",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replied",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Human Delay": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Alert": {
+      "main": [
+        []
+      ]
+    },
+    " Business Hours?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get Due Follow Ups",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replied": {
+      "main": [
+        [
+          {
+            "node": "Reply Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    " Start": {
+      "main": [
+        [
+          {
+            "node": "Get Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scorer ": {
+      "main": [
+        [
+          {
+            "node": "Save Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4ae94d39-8a8c-41bb-b941-e2733bac375a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "47d0cd03cbf352018cfca407374983590fd4abe8cfc61cb1e216638f06635956"
+  },
+  "id": "eNuoeEg56y1SwMl7",
+  "tags": []
+}

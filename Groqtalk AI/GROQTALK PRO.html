@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GROQTALK | Advanced AI Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .blur-bg { backdrop-filter: blur(12px); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .convo-active { background-color: #1e293b; border-color: #3b82f6 !important; }
+    </style>
+</head>
+<body class="flex h-screen bg-slate-900 text-slate-100 overflow-hidden font-sans">
+
+    <div id="greeting-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 blur-bg transition-opacity duration-500">
+        <div class="bg-slate-800 border border-slate-700 p-10 rounded-3xl shadow-2xl text-center max-w-md animate-pop mx-4">
+            <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-bolt text-3xl text-white"></i>
+            </div>
+            <h1 class="text-3xl font-black mb-2 tracking-tight text-white">HEY GENIUS!</h1>
+            <p class="text-slate-400 text-lg mb-1">Welcome to <span class="text-blue-400 font-bold">GROQTALK</span></p>
+            <p class="text-slate-500 italic mb-8">"Trust me, I won't judge"</p>
+            <button onclick="closeGreeting()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all active:scale-95">
+                Let's Start
+            </button>
+        </div>
+    </div>
+
+    <aside class="w-72 bg-slate-950 border-r border-slate-800 p-6 flex flex-col hidden md:flex">
+        <div class="mb-8">
+            <h1 class="text-2xl font-black tracking-tighter text-white flex items-center gap-2">
+                <span class="bg-blue-600 px-2 py-1 rounded-md text-xs">GT</span>
+                GROQ<span class="text-blue-500">TALK</span>
+            </h1>
+        </div>
+        
+        <button onclick="newChat()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 hover:bg-slate-700 transition mb-8 flex items-center justify-center gap-2 font-bold">
+            <i class="fa-solid fa-plus text-blue-400"></i> New Chat
+        </button>
+
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">Conversation History</div>
+        <div id="history-list" class="flex-1 overflow-y-auto space-y-2 text-sm text-slate-400">
+            </div>
+
+        <div class="mt-auto pt-6 border-t border-slate-800 text-[10px] text-slate-600 font-medium">
+            <p>PAF-IAST AI LAB • v1.1-stable</p>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col relative h-full bg-gradient-to-b from-slate-900 to-slate-950">
+        <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth pb-32">
+            <div id="welcome-state" class="flex flex-col items-center justify-center h-full opacity-30">
+                <i class="fa-solid fa-brain text-6xl mb-6"></i>
+                <h2 class="text-xl font-medium">What's on your mind?</h2>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-950 via-slate-950 to-transparent">
+            <div class="max-w-3xl mx-auto">
+                <div class="relative flex bg-slate-800 border border-slate-700 rounded-2xl p-2 shadow-2xl focus-within:border-blue-500/50 transition-all">
+                    <textarea id="query" 
+                        class="flex-1 bg-transparent border-none focus:ring-0 p-4 outline-none resize-none text-slate-100 placeholder-slate-500 h-[56px]" 
+                        placeholder="Ask me anything..." 
+                        onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); send(); }"></textarea>
+                    <button onclick="send()" class="bg-blue-600 hover:bg-blue-500 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-all active:scale-90 shadow-lg shadow-blue-600/20">
+                        <i class="fa-solid fa-arrow-up text-lg"></i>
+                    </button>
+                </div>
+                <p class="text-[10px] text-slate-600 text-center mt-3 uppercase tracking-widest">Powered by Llama 3.3 & Groq LPUs</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let conversations = JSON.parse(localStorage.getItem('groqtalk_convos') || '[]');
+        let currentConvoId = null;
+
+        function closeGreeting() {
+            const overlay = document.getElementById('greeting-overlay');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => overlay.style.display = 'none', 500);
+        }
+
+        function updateHistorySidebar() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = conversations.slice().reverse().map((convo) => `
+                <div class="group flex items-center justify-between p-3 hover:bg-slate-800/80 rounded-xl cursor-pointer transition border border-transparent hover:border-slate-700 mb-1 ${convo.id === currentConvoId ? 'convo-active' : ''}" onclick="loadConversation('${convo.id}')">
+                    <div class="flex items-center gap-3 truncate">
+                        <i class="fa-regular fa-message text-slate-600 group-hover:text-blue-400"></i>
+                        <span class="truncate text-slate-300 group-hover:text-white font-medium">${convo.title}</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); deleteConversation('${convo.id}')" class="opacity-0 group-hover:opacity-100 p-1.5 hover:text-red-400 transition">
+                        <i class="fa-solid fa-trash-can text-[10px]"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function send() {
+            const queryInput = document.getElementById("query");
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            const container = document.getElementById("chat-container");
+            const welcome = document.getElementById("welcome-state");
+            if(welcome) welcome.remove();
+
+            queryInput.value = "";
+            
+            // Start a new conversation boxing if none exists
+            if (!currentConvoId) {
+                currentConvoId = 'convo-' + Date.now();
+                conversations.push({
+                    id: currentConvoId,
+                    title: query.substring(0, 25) + (query.length > 25 ? '...' : ''),
+                    messages: [],
+                    time: Date.now()
+                });
+            }
+
+            // UI: USER MESSAGE
+            const userMsgHtml = `
+                <div class="flex flex-col items-end gap-2 group animate-pop">
+                    <div class="bg-blue-600 text-white px-5 py-3 rounded-2xl rounded-tr-none max-w-[80%] shadow-xl relative">
+                        <span class="text-sm leading-relaxed">${query}</span>
+                    </div>
+                </div>`;
+            container.innerHTML += userMsgHtml;
+
+            // UI: AI LOADING
+            const loadingId = 'loading-' + Date.now();
+            container.innerHTML += `
+                <div class="flex gap-4 animate-pop" id="${loadingId}">
+                    <div class="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center border border-blue-500/30 font-bold text-blue-400 text-[10px]">GT</div>
+                    <div class="bg-slate-800/40 p-4 rounded-2xl rounded-tl-none border border-slate-700 text-slate-500 text-sm italic">Thinking...</div>
+                </div>`;
+            container.scrollTop = container.scrollHeight;
+
+            try {
+                const res = await fetch("http://localhost:5678/webhook/rag-agent", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query })
+                });
+
+                let text = await res.text();
+                text = text.replace(/\\n/g, '<br>');
+                document.getElementById(loadingId).remove();
+
+                // UI: AI RESPONSE
+                const aiMsgHtml = `
+                    <div class="flex gap-4 animate-pop">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                            <i class="fa-solid fa-robot text-emerald-400 text-xs"></i>
+                        </div>
+                        <div class="bg-slate-800 p-5 rounded-2xl rounded-tl-none max-w-[85%] border border-slate-700 text-sm leading-relaxed shadow-lg text-slate-200">
+                            ${text}
+                        </div>
+                    </div>`;
+                container.innerHTML += aiMsgHtml;
+
+                // Save both messages to the conversation memory
+                const convoIndex = conversations.findIndex(c => c.id === currentConvoId);
+                conversations[convoIndex].messages.push({ role: 'user', content: userMsgHtml });
+                conversations[convoIndex].messages.push({ role: 'ai', content: aiMsgHtml });
+                
+                localStorage.setItem('groqtalk_convos', JSON.stringify(conversations));
+                updateHistorySidebar();
+
+            } catch (err) {
+                document.getElementById(loadingId).innerHTML = `<div class="bg-red-900/20 text-red-400 p-4 rounded-xl border border-red-500/20 text-sm">Failed to connect to GROQTALK server.</div>`;
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function loadConversation(id) {
+            const convo = conversations.find(c => c.id === id);
+            if (!convo) return;
+            
+            currentConvoId = id;
+            const container = document.getElementById("chat-container");
+            container.innerHTML = convo.messages.map(m => m.content).join('');
+            container.scrollTop = container.scrollHeight;
+            updateHistorySidebar(); // Refresh to show active state
+        }
+
+        function deleteConversation(id) {
+            if (confirm("Permanently delete this conversation?")) {
+                conversations = conversations.filter(c => c.id !== id);
+                localStorage.setItem('groqtalk_convos', JSON.stringify(conversations));
+                if (currentConvoId === id) newChat();
+                else updateHistorySidebar();
+            }
+        }
+
+        function newChat() {
+            currentConvoId = null;
+            document.getElementById("chat-container").innerHTML = `
+                <div id="welcome-state" class="flex flex-col items-center justify-center h-full opacity-30">
+                    <i class="fa-solid fa-brain text-6xl mb-6"></i>
+                    <h2 class="text-xl font-medium">Start a new conversation</h2>
+                </div>`;
+            updateHistorySidebar();
+        }
+
+        updateHistorySidebar();
+    </script>
+</body>
+</html>

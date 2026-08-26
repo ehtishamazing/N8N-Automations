@@ -1,0 +1,292 @@
+{
+  "name": "Groq Multi-Agent Lite",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rag-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "584876ff-8a97-4d8f-8548-6751297cedca",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1456,
+        112
+      ],
+      "webhookId": "8b7ff751-a992-45ce-9c51-7066240c5ba5"
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{ query: $json.body.query }];"
+      },
+      "id": "b8f58a6a-6ac0-4410-9fc3-42578b6b33b8",
+      "name": "Extract Query",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{\nJSON.stringify({\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a reasoning agent. Today is \" + $now.format('cccc, MMMM dd, yyyy') + \".\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Query: \" + $node[\"Extract Query\"].json.query + \"\\n\\nSearch Results: \" + ($node[\"HTTP Request\"].json.organic_results?.[0]?.snippet || \"No results found.\")\n    }\n  ]\n})\n}}",
+        "headerParametersJson": "{\n  \"Authorization\": \"Bearer YOUR_GROQ_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}"
+      },
+      "id": "4f113d42-4443-45a8-a4b7-c6e9b04d8099",
+      "name": "Reasoning Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        32
+      ],
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{ answer: $json.choices?.[0]?.message?.content || \"No answer returned\" }];"
+      },
+      "id": "067eccfc-c9d8-4f11-84b2-ddb60e7ee285",
+      "name": "Extract Answer",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Get the content from the Critic Agent\nlet criticText = $json.choices?.[0]?.message?.content || \"\";\n// Get the original answer from the Reasoning Agent stage\nlet originalAnswer = $node[\"Extract Answer\"].json.answer;\n\ntry {\n  const res = JSON.parse(criticText);\n  // If the AI returned JSON but the 'final' key is empty, fill it with the original answer\n  if (res.status === \"APPROVED\" && (!res.final || res.final === \"\")) {\n    res.final = originalAnswer;\n  }\n  return [res];\n} catch (e) {\n  // If it's not JSON, assume it's a plain text approval\n  return [{\n    status: \"APPROVED\",\n    final: originalAnswer\n  }];\n}"
+      },
+      "id": "1b515596-b838-49a7-88a1-e49a63ac4f68",
+      "name": "Parse Critic",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.status}}",
+              "value2": "APPROVED"
+            }
+          ]
+        }
+      },
+      "id": "d1181b16-9dc0-4bb3-9816-918562b39eb4",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.final }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/plain"
+              }
+            ]
+          }
+        }
+      },
+      "id": "73cf8141-ec75-48a9-a960-0795c9327fee",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{ query: $node['Extract Query'].json.query }];"
+      },
+      "id": "5c9c5817-768d-4bda-88c6-02609ddd6f6d",
+      "name": "Retry",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        224,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://serpapi.com/search.json?engine=google&q={{ $json.query }}&api_key=YOUR_SERPAPI_KEY",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -992,
+        112
+      ],
+      "id": "e596fb1e-88b5-4c5c-9cdf-a162a15b8260",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "raw"
+        },
+        "bodyParametersJson": "={{\nJSON.stringify({\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a strict AI critic. Always return valid JSON only.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": `Evaluate this answer:\\n\\n${$json.answer}\\n\\nReturn JSON with keys: status, final.`\n    }\n  ]\n})\n}}",
+        "headerParametersJson": "={{ {\n  \"Authorization\": \"Bearer YOUR_GROQ_API_KEY\",\n  \"Content-Type\": \"application/json\"\n} }}"
+      },
+      "id": "665c5ee3-8e4e-4b75-82e1-0ce30ec429bf",
+      "name": "Critic Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        16
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Query": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reasoning Agent": {
+      "main": [
+        [
+          {
+            "node": "Extract Answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Answer": {
+      "main": [
+        [
+          {
+            "node": "Critic Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Critic": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retry": {
+      "main": [
+        [
+          {
+            "node": "Reasoning Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Reasoning Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Critic Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Critic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9ef25c0e-bbeb-4ad7-8dec-9432be38a231",
+  "meta": {
+    "instanceId": "47d0cd03cbf352018cfca407374983590fd4abe8cfc61cb1e216638f06635956"
+  },
+  "id": "Jxt5n6pgJvlQReUA",
+  "tags": []
+}

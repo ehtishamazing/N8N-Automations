@@ -1,0 +1,456 @@
+{
+  "name": "SmartPost Ai",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-content",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "rawBody": true
+        }
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        688,
+        368
+      ],
+      "id": "1ef88eba-0723-437d-9fbd-7a5f06b28cb4",
+      "webhookId": "6f1eab71-763b-4e96-8ef4-7552d24194fe",
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "idea",
+              "stringValue": "={{$json.body.idea}}"
+            },
+            {
+              "name": "tone",
+              "stringValue": "={{ $json.body.tone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Idea",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        928,
+        192
+      ],
+      "id": "de80560d-51e7-42fa-b4bb-40e705e541b1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an expert LinkedIn ghostwriter. Write like a real human founder sharing a genuine insight. Short punchy paragraphs. Strong hook. No robotic phrases. No hashtags. End with a question.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a LinkedIn post about: {{$node['Set Idea'].json.idea}}. Use a {{$node['Set Idea'].json.tone}} tone.\"\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "name": "LinkedIn Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1120,
+        400
+      ],
+      "id": "89070ece-70aa-45e4-bf7c-e50830789afc"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a viral Twitter ghostwriter. Write threads like a brilliant friend texting insights. Tweet 1 is a bold hook. Tweets 2-4 deliver value. Tweet 5 is a strong conclusion. Number each 1/ 2/ 3/ 4/ 5/. Under 280 chars each. Real and human.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a 5 tweet thread about: {{$node['Set Idea'].json.idea}}. Use a {{$node['Set Idea'].json.tone}} tone.\"\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "name": "Twitter Thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1360,
+        224
+      ],
+      "id": "fa0ea748-4d2f-4705-b6fd-0e3ed5b70d84"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an Instagram content strategist. Write warm, authentic, and detailed captions. Ensure the caption is at least 2 full paragraphs long. Hook first. Provide real value. Natural CTA. Include 15 hashtags at the bottom. Sound like a passionate real person.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a detailed Instagram caption (minimum 2 paragraphs) about: {{$node['Set Idea'].json.idea}}. Use a {{$node['Set Idea'].json.tone}} tone.\"\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "name": "Instagram Caption",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1552,
+        368
+      ],
+      "id": "45fb5e19-4943-4bb0-93fe-cf67f3a52584"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a professional SEO content strategist. Create a comprehensive blog outline including an SEO title, meta description, and clear H2/H3 section headers.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Create a detailed blog outline for: {{$node['Set Idea'].json.idea}}. Ensure the structure reflects a {{$node['Set Idea'].json.tone}} tone.\"\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "name": "Blog Outline",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1744,
+        160
+      ],
+      "id": "ff5ef0cd-e936-4a42-a975-cc837f330ca8"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1BfOQ6dI92aUIZnh8gdTbdn5tUSkkCGCmGbHu7vAAf0M",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Content Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BfOQ6dI92aUIZnh8gdTbdn5tUSkkCGCmGbHu7vAAf0M/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Main Idea": "={{ $json.idea }}",
+            "Brand Voice": "={{ $json.tone }}",
+            "LinkedIn Post": "={{ $json.linkedin }}",
+            "Twitter Content": "={{ $json.twitter }}",
+            "Blog Outline": "={{ $json.blog }}",
+            "Generated At": "={{ $json.timestamp }}",
+            "Instagram Caption": "={{ $json.instagram }}"
+          },
+          "matchingColumns": [
+            "Index"
+          ],
+          "schema": [
+            {
+              "id": "Main Idea",
+              "displayName": "Main Idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Brand Voice",
+              "displayName": "Brand Voice",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn Post",
+              "displayName": "LinkedIn Post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Twitter Content",
+              "displayName": "Twitter Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Instagram Caption",
+              "displayName": "Instagram Caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Blog Outline",
+              "displayName": "Blog Outline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Generated At",
+              "displayName": "Generated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED"
+        }
+      },
+      "name": "Save to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        2208,
+        592
+      ],
+      "id": "49899439-b55b-427e-a586-6a1c7cef6da4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VW8O3mXXykyj71Xl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2208,
+        176
+      ],
+      "id": "25252e63-a2ad-4006-9da4-0e90105b7ae9",
+      "alwaysOutputData": true,
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  // 1. Get the original idea and tone\n  const idea = $node[\"Webhook\"].json.body.idea || \"No Idea Provided\";\n  const tone = $node[\"Webhook\"].json.body.tone || \"Professional\";\n\n  // 2. Helper to find text even if node names change\n  // This searches through previous nodes for the message content\n  const getOutput = (nodeName) => {\n    try {\n      return $node[nodeName].json.choices[0].message.content;\n    } catch (e) {\n      return \"Content not found. Check node name: \" + nodeName;\n    }\n  };\n\n  // 3. Return the EXACT keys your HTML looks for\n  return {\n    idea: idea,\n    tone: tone,\n    linkedin: getOutput(\"LinkedIn Post\"),   // Make sure these match your node names!\n    twitter: getOutput(\"Twitter Thread\"),\n    instagram: getOutput(\"Instagram Caption\"),\n    blog: getOutput(\"Blog Outline\"),\n    timestamp: new Date().toLocaleTimeString()\n  };\n} catch (error) {\n  return { \n    error: error.message,\n    hint: \"Ensure your Groq nodes are named exactly as shown in the code above.\"\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        400
+      ],
+      "id": "294acd1a-9493-447a-885a-4df30194b93f",
+      "name": "Combine Results"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Idea",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Idea": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Post": {
+      "main": [
+        [
+          {
+            "node": "Twitter Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Twitter Thread": {
+      "main": [
+        [
+          {
+            "node": "Instagram Caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram Caption": {
+      "main": [
+        [
+          {
+            "node": "Blog Outline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Sheets": {
+      "main": [
+        []
+      ]
+    },
+    "Blog Outline": {
+      "main": [
+        [
+          {
+            "node": "Combine Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Results": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "39f5c474-7c93-4bf6-942b-7132319d2f26",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "47d0cd03cbf352018cfca407374983590fd4abe8cfc61cb1e216638f06635956"
+  },
+  "id": "8t47JTYzeAbGRbqR",
+  "tags": []
+}
